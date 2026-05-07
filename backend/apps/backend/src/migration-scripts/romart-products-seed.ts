@@ -688,8 +688,10 @@ export default async function romart_products_seed({
     "PHILIPS-",  // Philips
     "BD-",       // Black & Decker
   ];
-  const romartInventoryItems = inventoryItems.filter((item: { sku: string }) =>
-    romartSkuPrefixes.some((prefix) => item.sku?.startsWith(prefix))
+  const romartInventoryItems = inventoryItems.filter(
+    (item): item is typeof item & { sku: string } =>
+      typeof item.sku === "string" &&
+      romartSkuPrefixes.some((prefix) => item.sku.startsWith(prefix))
   );
 
   if (romartInventoryItems.length > 0 && stockLocation) {

@@ -28,8 +28,8 @@ export async function GET(
         id: order.id,
         display_id: order.display_id,
         status: order.status,
-        fulfillment_status: order.fulfillment_status || "pending",
-        payment_status: order.payment_status || "pending",
+        fulfillment_status: "pending", // Note: not available on OrderDTO in Medusa 2.x
+        payment_status: "pending", // Note: not available on OrderDTO in Medusa 2.x
         created_at: order.created_at,
         items: order.items?.map((item) => ({
           id: item.id,

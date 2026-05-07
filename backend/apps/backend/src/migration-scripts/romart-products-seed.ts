@@ -103,7 +103,7 @@ export default async function romart_products_seed({
     fields: ["id", "name", "currency_code"],
   });
 
-  let ghanaRegion = existingRegions.find(
+  let ghanaRegion: any = existingRegions.find(
     (r: { currency_code: string }) => r.currency_code === "ghs"
   );
 

@@ -53,9 +53,9 @@ export async function GET(
       })
       .map((level) => ({
         inventoryItemId: level.inventory_item_id,
-        sku: level.inventory_item?.sku || null,
-        title: level.inventory_item?.title || null,
-        description: level.inventory_item?.description || null,
+        sku: null, // Note: inventory_item relation not available in Medusa 2.x
+        title: null,
+        description: null,
         stocked_quantity: level.stocked_quantity,
         reserved_quantity: level.reserved_quantity,
         available_quantity: level.stocked_quantity - level.reserved_quantity,
@@ -117,9 +117,9 @@ export async function POST(
       })
       .map((level) => ({
         inventoryItemId: level.inventory_item_id,
-        sku: level.inventory_item?.sku || null,
-        title: level.inventory_item?.title || null,
-        description: level.inventory_item?.description || null,
+        sku: null, // Note: inventory_item relation not available in Medusa 2.x
+        title: null,
+        description: null,
         stocked_quantity: level.stocked_quantity,
         reserved_quantity: level.reserved_quantity,
         available_quantity: level.stocked_quantity - level.reserved_quantity,

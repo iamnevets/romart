@@ -211,7 +211,7 @@ export async function GET(
     return res.status(200).json({
       success: true,
       orderId: order.id,
-      fulfillmentStatus: order.fulfillment_status || "pending",
+      fulfillmentStatus: "pending", // Note: fulfillment_status not available on OrderDTO in Medusa 2.x
       status: order.status,
       items: order.items?.map((item) => ({
         id: item.id,

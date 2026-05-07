@@ -56,11 +56,13 @@ jobs:
         run: |
           mkdir -p deploy/backend deploy/storefront
 
-          # Backend files
-          cp -r backend/apps/backend/dist deploy/backend/
+          # Backend files (Medusa 2.x builds to .medusa/server)
+          cp -r backend/apps/backend/.medusa deploy/backend/
           cp -r backend/apps/backend/node_modules deploy/backend/
+          cp -r backend/apps/backend/src deploy/backend/
           cp backend/apps/backend/package*.json deploy/backend/
           cp backend/apps/backend/medusa-config.ts deploy/backend/
+          cp backend/apps/backend/tsconfig.json deploy/backend/
 
           # Storefront files
           cp -r storefront/.next deploy/storefront/

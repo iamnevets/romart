@@ -90,7 +90,7 @@ jobs:
 
       - name: Deploy on EC2
         run: |
-          ssh -i ~/.ssh/deploy_key ubuntu@${{ secrets.EC2_HOST }} << 'ENDSSH'
+          ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=5 -i ~/.ssh/deploy_key ubuntu@${{ secrets.EC2_HOST }} << 'ENDSSH'
             set -e
 
             echo "=== Stopping applications ==="
@@ -106,7 +106,7 @@ jobs:
 
             echo "=== Installing Backend Dependencies ==="
             cd ~/romart/backend/apps/backend
-            npm ci --omit=dev
+            npm ci --omit=dev --loglevel=info
 
             echo "=== Deploying Storefront ==="
             mkdir -p romart/storefront
@@ -114,7 +114,7 @@ jobs:
 
             echo "=== Installing Storefront Dependencies ==="
             cd ~/romart/storefront
-            npm ci --omit=dev
+            npm ci --omit=dev --loglevel=info
 
             echo "=== Running Database Migrations ==="
             cd ~/romart/backend/apps/backend

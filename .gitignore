@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.paystack
+**/.env.paystack
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+
+# Medusa
+.cache/
+uploads/
+
+# Docker volumes (if using local bind mounts)
+postgres_data/
+redis_data/
+
+# Misc
+*.log
+*.pid
+*.seed
+
+# AWS credentials and sensitive docs
+*.pem
+AWS_INFRASTRUCTURE.md

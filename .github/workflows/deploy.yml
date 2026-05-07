@@ -106,7 +106,7 @@ jobs:
 
             echo "=== Installing Backend Dependencies ==="
             cd ~/romart/backend/apps/backend
-            npm ci --omit=dev --loglevel=info
+            npm ci --omit=dev --loglevel=info --ignore-scripts --no-workspaces
 
             echo "=== Deploying Storefront ==="
             mkdir -p romart/storefront

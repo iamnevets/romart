@@ -1,0 +1,153 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allow manual trigger
+
+env:
+  NODE_VERSION: '20.x'
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy Romart
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/apps/backend/package-lock.json
+            storefront/package-lock.json
+
+      # ============================================
+      # BUILD BACKEND
+      # ============================================
+      - name: Install Backend Dependencies
+        working-directory: backend/apps/backend
+        run: npm ci
+
+      - name: Build Backend
+        working-directory: backend/apps/backend
+        run: npm run build
+
+      # ============================================
+      # BUILD STOREFRONT
+      # ============================================
+      - name: Install Storefront Dependencies
+        working-directory: storefront
+        run: npm ci
+
+      - name: Build Storefront
+        working-directory: storefront
+        run: npm run build
+        env:
+          NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${{ secrets.NEXT_PUBLIC_MEDUSA_BACKEND_URL }}
+          NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: ${{ secrets.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY }}
+
+      # ============================================
+      # PREPARE DEPLOYMENT PACKAGE
+      # ============================================
+      - name: Create deployment package
+        run: |
+          mkdir -p deploy/backend deploy/storefront
+
+          # Backend files
+          cp -r backend/apps/backend/dist deploy/backend/
+          cp -r backend/apps/backend/node_modules deploy/backend/
+          cp backend/apps/backend/package*.json deploy/backend/
+          cp backend/apps/backend/medusa-config.ts deploy/backend/
+
+          # Storefront files
+          cp -r storefront/.next deploy/storefront/
+          cp -r storefront/node_modules deploy/storefront/
+          cp -r storefront/public deploy/storefront/
+          cp storefront/package*.json deploy/storefront/
+          cp storefront/next.config.* deploy/storefront/
+
+          # Create tarball
+          tar -czf deploy.tar.gz deploy/
+
+      # ============================================
+      # DEPLOY TO EC2
+      # ============================================
+      - name: Setup SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Upload to EC2
+        run: |
+          scp -i ~/.ssh/deploy_key deploy.tar.gz ubuntu@${{ secrets.EC2_HOST }}:/tmp/
+
+      - name: Deploy on EC2
+        run: |
+          ssh -i ~/.ssh/deploy_key ubuntu@${{ secrets.EC2_HOST }} << 'ENDSSH'
+            set -e
+
+            echo "=== Stopping applications ==="
+            pm2 stop romart-backend romart-storefront || true
+
+            echo "=== Extracting deployment package ==="
+            cd ~
+            tar -xzf /tmp/deploy.tar.gz
+
+            echo "=== Deploying Backend ==="
+            mkdir -p romart/backend/apps/backend
+            cp -r deploy/backend/* romart/backend/apps/backend/
+
+            echo "=== Deploying Storefront ==="
+            mkdir -p romart/storefront
+            cp -r deploy/storefront/* romart/storefront/
+
+            echo "=== Running Database Migrations ==="
+            cd ~/romart/backend/apps/backend
+            npx medusa db:migrate
+
+            echo "=== Starting Backend ==="
+            cd ~/romart/backend/apps/backend
+            pm2 start npm --name "romart-backend" -- run start || pm2 restart romart-backend
+
+            echo "=== Starting Storefront ==="
+            cd ~/romart/storefront
+            pm2 start npm --name "romart-storefront" -- run start || pm2 restart romart-storefront
+
+            echo "=== Saving PM2 configuration ==="
+            pm2 save
+
+            echo "=== Cleaning up ==="
+            rm -rf ~/deploy
+            rm /tmp/deploy.tar.gz
+
+            echo "=== Deployment Complete ==="
+            pm2 list
+          ENDSSH
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -f ~/.ssh/deploy_key
+          rm -f deploy.tar.gz
+
+      # ============================================
+      # NOTIFY (Optional)
+      # ============================================
+      - name: Deployment Status
+        if: always()
+        run: |
+          if [ ${{ job.status }} == 'success' ]; then
+            echo "✅ Deployment successful!"
+          else
+            echo "❌ Deployment failed!"
+            exit 1
+          fi

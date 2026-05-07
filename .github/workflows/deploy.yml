@@ -23,16 +23,13 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: |
-            backend/apps/backend/package-lock.json
-            storefront/package-lock.json
 
       # ============================================
       # BUILD BACKEND
       # ============================================
       - name: Install Backend Dependencies
         working-directory: backend/apps/backend
-        run: npm ci
+        run: npm install
 
       - name: Build Backend
         working-directory: backend/apps/backend
@@ -43,7 +40,7 @@ jobs:
       # ============================================
       - name: Install Storefront Dependencies
         working-directory: storefront
-        run: npm ci
+        run: npm install
 
       - name: Build Storefront
         working-directory: storefront

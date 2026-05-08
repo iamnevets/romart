@@ -22,19 +22,20 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          # Caching disabled for now - mixed package managers (yarn + npm)
+
+      - name: Enable Corepack
+        run: corepack enable
 
       # ============================================
       # BUILD BACKEND
       # ============================================
       - name: Install Backend Dependencies
         working-directory: backend/apps/backend
-        run: |
-          yarn install --production --frozen-lockfile || yarn install --production
+        run: npm install --omit=dev
 
       - name: Build Backend
         working-directory: backend/apps/backend
-        run: yarn build
+        run: npm run build
 
       # ============================================
       # BUILD STOREFRONT

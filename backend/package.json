@@ -1,7 +1,7 @@
 {
   "name": "backend",
-  "private": false,
-  "packageManager": "npm@11.6.2",
+  "private": true,
+  "packageManager": "yarn@1.22.22",
   "engines": {
     "node": ">=20"
   },

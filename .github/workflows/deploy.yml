@@ -27,26 +27,54 @@ jobs:
         run: corepack enable
 
       # ============================================
+      # CACHE YARN DEPENDENCIES
+      # ============================================
+      - name: Get Yarn cache directory
+        id: yarn-cache-dir
+        run: echo "dir=$(yarn cache dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache Backend Yarn dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            backend/node_modules
+            backend/apps/backend/node_modules
+            ${{ steps.yarn-cache-dir.outputs.dir }}
+          key: backend-yarn-${{ runner.os }}-${{ hashFiles('backend/yarn.lock', 'backend/package.json') }}
+          restore-keys: |
+            backend-yarn-${{ runner.os }}-
+
+      - name: Cache Storefront Yarn dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            storefront/node_modules
+            ${{ steps.yarn-cache-dir.outputs.dir }}
+          key: storefront-yarn-${{ runner.os }}-${{ hashFiles('storefront/package.json', 'storefront/yarn.lock') }}
+          restore-keys: |
+            storefront-yarn-${{ runner.os }}-
+
+      # ============================================
       # BUILD BACKEND
       # ============================================
       - name: Install Backend Dependencies
-        working-directory: backend/apps/backend
-        run: npm install --omit=dev
+        working-directory: backend
+        run: yarn install --production --frozen-lockfile
 
       - name: Build Backend
         working-directory: backend/apps/backend
-        run: npm run build
+        run: yarn build
 
       # ============================================
       # BUILD STOREFRONT
       # ============================================
       - name: Install Storefront Dependencies
         working-directory: storefront
-        run: npm install
+        run: yarn install --frozen-lockfile
 
       - name: Build Storefront
         working-directory: storefront
-        run: npm run build
+        run: yarn build
         env:
           NEXT_PUBLIC_MEDUSA_BACKEND_URL: ${{ secrets.NEXT_PUBLIC_MEDUSA_BACKEND_URL }}
           NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}

@@ -22,17 +22,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          # Caching disabled for now - mixed package managers (yarn + npm)
 
       # ============================================
       # BUILD BACKEND
       # ============================================
       - name: Install Backend Dependencies
         working-directory: backend/apps/backend
-        run: npm install
+        run: |
+          yarn install --production --frozen-lockfile || yarn install --production
 
       - name: Build Backend
         working-directory: backend/apps/backend
-        run: npm run build
+        run: yarn build
 
       # ============================================
       # BUILD STOREFRONT
@@ -58,6 +60,7 @@ jobs:
 
           # Backend files (Medusa 2.x builds to .medusa/server)
           cp -r backend/apps/backend/.medusa deploy/backend/
+          cp -r backend/apps/backend/node_modules deploy/backend/
           cp -r backend/apps/backend/src deploy/backend/
           cp backend/apps/backend/package*.json deploy/backend/
           cp backend/apps/backend/medusa-config.ts deploy/backend/
@@ -65,6 +68,7 @@ jobs:
 
           # Storefront files
           cp -r storefront/.next deploy/storefront/
+          cp -r storefront/node_modules deploy/storefront/
           cp -r storefront/public deploy/storefront/
           cp storefront/package*.json deploy/storefront/
           cp storefront/next.config.* deploy/storefront/
@@ -104,17 +108,9 @@ jobs:
             mkdir -p romart/backend/apps/backend
             cp -r deploy/backend/* romart/backend/apps/backend/
 
-            echo "=== Installing Backend Dependencies ==="
-            cd ~/romart/backend/apps/backend
-            npm install --omit=dev --loglevel=info --no-workspaces
-
             echo "=== Deploying Storefront ==="
             mkdir -p romart/storefront
             cp -r deploy/storefront/* romart/storefront/
-
-            echo "=== Installing Storefront Dependencies ==="
-            cd ~/romart/storefront
-            npm install --omit=dev --loglevel=info
 
             echo "=== Running Database Migrations ==="
             cd ~/romart/backend/apps/backend

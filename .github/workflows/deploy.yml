@@ -88,6 +88,12 @@ jobs:
           mkdir -p deploy/backend deploy/storefront
 
           # Backend files (Medusa 2.x builds to .medusa/server)
+          # Copy workspace structure
+          mkdir -p deploy/backend_workspace
+          cp -r backend/node_modules deploy/backend_workspace/
+          cp backend/package.json deploy/backend_workspace/
+
+          # Copy app files
           cp -r backend/apps/backend/.medusa deploy/backend/
           cp -r backend/apps/backend/node_modules deploy/backend/
           cp -r backend/apps/backend/src deploy/backend/
@@ -135,23 +141,30 @@ jobs:
 
             echo "=== Deploying Backend ==="
             mkdir -p romart/backend/apps/backend
+            cp -r deploy/backend_workspace/* romart/backend/
             cp -r deploy/backend/* romart/backend/apps/backend/
 
             echo "=== Deploying Storefront ==="
             mkdir -p romart/storefront
             cp -r deploy/storefront/* romart/storefront/
 
+            echo "=== Setting up environment ==="
+            export NODE_ENV=production
+
             echo "=== Running Database Migrations ==="
             cd ~/romart/backend/apps/backend
-            npx medusa db:migrate
+            NODE_ENV=production npx medusa db:migrate
 
             echo "=== Starting Backend ==="
             cd ~/romart/backend/apps/backend
-            pm2 start npm --name "romart-backend" -- run start || pm2 restart romart-backend
+            pm2 start npm --name "romart-backend" --update-env -e ~/romart/logs/backend-error.log -o ~/romart/logs/backend-out.log -- run start || pm2 restart romart-backend --update-env
+
+            echo "=== Creating log directories ==="
+            mkdir -p ~/romart/logs
 
             echo "=== Starting Storefront ==="
             cd ~/romart/storefront
-            pm2 start npm --name "romart-storefront" -- run start || pm2 restart romart-storefront
+            pm2 start npm --name "romart-storefront" --update-env -e ~/romart/logs/storefront-error.log -o ~/romart/logs/storefront-out.log -- run start || pm2 restart romart-storefront --update-env
 
             echo "=== Saving PM2 configuration ==="
             pm2 save

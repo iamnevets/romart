@@ -59,7 +59,7 @@ jobs:
       # ============================================
       - name: Install Backend Dependencies
         working-directory: backend
-        run: yarn install --production --frozen-lockfile
+        run: yarn install --frozen-lockfile
 
       - name: Build Backend
         working-directory: backend/apps/backend

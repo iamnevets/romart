@@ -151,6 +151,29 @@ jobs:
             echo "=== Setting up environment ==="
             export NODE_ENV=production
 
+            echo "=== Creating Backend .env.production ==="
+            cat > ~/romart/backend/apps/backend/.env.production << 'ENVEOF'
+DATABASE_URL=${{ secrets.DATABASE_URL }}
+REDIS_URL=${{ secrets.REDIS_URL }}
+ADMIN_CORS=https://api.romartkitchens.com,https://romartkitchens.com
+STORE_CORS=https://romartkitchens.com,https://www.romartkitchens.com
+AUTH_CORS=https://api.romartkitchens.com,https://romartkitchens.com,https://www.romartkitchens.com
+JWT_SECRET=${{ secrets.JWT_SECRET }}
+COOKIE_SECRET=${{ secrets.COOKIE_SECRET }}
+PAYSTACK_SECRET_KEY=${{ secrets.PAYSTACK_SECRET_KEY }}
+S3_BUCKET=romart-media-bucket
+S3_REGION=us-east-1
+NODE_ENV=production
+ENVEOF
+
+            echo "=== Creating Storefront .env.local ==="
+            cat > ~/romart/storefront/.env.local << 'ENVEOF'
+NEXT_PUBLIC_MEDUSA_BACKEND_URL=${{ secrets.NEXT_PUBLIC_MEDUSA_BACKEND_URL }}
+NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}
+NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=${{ secrets.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY }}
+NODE_ENV=production
+ENVEOF
+
             echo "=== Running Database Migrations ==="
             cd ~/romart/backend/apps/backend
             NODE_ENV=production npx medusa db:migrate

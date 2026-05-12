@@ -152,27 +152,23 @@ jobs:
             export NODE_ENV=production
 
             echo "=== Creating Backend .env.production ==="
-            cat > ~/romart/backend/apps/backend/.env.production << 'ENVEOF'
-DATABASE_URL=${{ secrets.DATABASE_URL }}
-REDIS_URL=${{ secrets.REDIS_URL }}
-ADMIN_CORS=https://api.romartkitchens.com,https://romartkitchens.com
-STORE_CORS=https://romartkitchens.com,https://www.romartkitchens.com
-AUTH_CORS=https://api.romartkitchens.com,https://romartkitchens.com,https://www.romartkitchens.com
-JWT_SECRET=${{ secrets.JWT_SECRET }}
-COOKIE_SECRET=${{ secrets.COOKIE_SECRET }}
-PAYSTACK_SECRET_KEY=${{ secrets.PAYSTACK_SECRET_KEY }}
-S3_BUCKET=romart-media-bucket
-S3_REGION=us-east-1
-NODE_ENV=production
-ENVEOF
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" > ~/romart/backend/apps/backend/.env.production
+            echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> ~/romart/backend/apps/backend/.env.production
+            echo "ADMIN_CORS=https://api.romartkitchens.com,https://romartkitchens.com" >> ~/romart/backend/apps/backend/.env.production
+            echo "STORE_CORS=https://romartkitchens.com,https://www.romartkitchens.com" >> ~/romart/backend/apps/backend/.env.production
+            echo "AUTH_CORS=https://api.romartkitchens.com,https://romartkitchens.com,https://www.romartkitchens.com" >> ~/romart/backend/apps/backend/.env.production
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> ~/romart/backend/apps/backend/.env.production
+            echo "COOKIE_SECRET=${{ secrets.COOKIE_SECRET }}" >> ~/romart/backend/apps/backend/.env.production
+            echo "PAYSTACK_SECRET_KEY=${{ secrets.PAYSTACK_SECRET_KEY }}" >> ~/romart/backend/apps/backend/.env.production
+            echo "S3_BUCKET=romart-media-bucket" >> ~/romart/backend/apps/backend/.env.production
+            echo "S3_REGION=us-east-1" >> ~/romart/backend/apps/backend/.env.production
+            echo "NODE_ENV=production" >> ~/romart/backend/apps/backend/.env.production
 
             echo "=== Creating Storefront .env.local ==="
-            cat > ~/romart/storefront/.env.local << 'ENVEOF'
-NEXT_PUBLIC_MEDUSA_BACKEND_URL=${{ secrets.NEXT_PUBLIC_MEDUSA_BACKEND_URL }}
-NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}
-NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=${{ secrets.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY }}
-NODE_ENV=production
-ENVEOF
+            echo "NEXT_PUBLIC_MEDUSA_BACKEND_URL=${{ secrets.NEXT_PUBLIC_MEDUSA_BACKEND_URL }}" > ~/romart/storefront/.env.local
+            echo "NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY }}" >> ~/romart/storefront/.env.local
+            echo "NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=${{ secrets.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY }}" >> ~/romart/storefront/.env.local
+            echo "NODE_ENV=production" >> ~/romart/storefront/.env.local
 
             echo "=== Running Database Migrations ==="
             cd ~/romart/backend/apps/backend
